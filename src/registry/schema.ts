@@ -62,10 +62,12 @@ const frameworkSource = z.object({
   exportName: text,
   usage: text,
   dependencies: dependencyMap,
-  verification: z.object({
-    status: z.enum(['provisional', 'verified']),
-    capabilities: verificationCapabilities,
-  }).optional(),
+  verification: z
+    .object({
+      status: z.enum(['provisional', 'verified']),
+      capabilities: verificationCapabilities,
+    })
+    .optional(),
 });
 const creator = z.object({ name: text, url: httpUrl.optional() });
 const provenance = z.discriminatedUnion('type', [

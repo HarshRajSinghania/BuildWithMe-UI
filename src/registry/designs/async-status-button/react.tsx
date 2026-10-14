@@ -37,6 +37,7 @@ export default function AsyncStatusButton({
   return (
     <div ref={ref} className="bw-demo" data-active={active}>
       <motion.button
+        type="button"
         className="bw-button"
         animate={{ scale: active && status === 'done' ? 1.04 : 1 }}
         disabled={status === 'working'}

@@ -58,7 +58,7 @@ async function run() {
       :aria-busy="status === 'working'"
       @click="run"
     >
-      <span role="status">{{
+      <span aria-live="polite">{{
         status === 'working'
           ? 'Saving…'
           : status === 'done'

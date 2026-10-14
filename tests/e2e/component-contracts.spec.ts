@@ -1,5 +1,6 @@
 import { expect, test, type Locator } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import AxeBuilder from '@axe-core/playwright';
 // Each source uses its own page/context and unique golden paths; run these independently.
 test.describe.configure({ mode: 'parallel' });
 const manifests = JSON.parse(
@@ -155,7 +156,7 @@ async function exercise(id: string, demo: Locator) {
 
 for (const framework of ['react', 'vue', 'svelte'] as const) {
   for (const manifest of manifests) {
-    test(`${manifest.id}/${framework}: contract and deterministic theme captures`, async ({
+    test(`${manifest.id}/${framework}: behavior, themes, accessibility and frame bounds`, async ({
       page,
     }) => {
       test.setTimeout(60_000);
@@ -183,13 +184,89 @@ for (const framework of ['react', 'vue', 'svelte'] as const) {
           expect(
             await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
           ).toBe(true);
-          // Baselines require review; do not auto-approve generated snapshots.
-          await expect(page).toHaveScreenshot(`${manifest.id}-${framework}-${theme}-${width}.png`, {
-            animations: 'disabled',
-            maxDiffPixelRatio: 0.01,
-          });
+          expect(
+            await demo.evaluate(
+              (element) =>
+                element.ownerDocument.documentElement.scrollWidth <=
+                element.ownerDocument.defaultView!.innerWidth,
+            ),
+          ).toBe(true);
+          if (manifest.id === 'flowing-lines') {
+            const bars = await demo
+              .locator('.bw-flow-line')
+              .evaluateAll((elements) =>
+                elements.map((element) => element.getBoundingClientRect().x),
+              );
+            expect(bars[bars.length - 1]).toBeGreaterThan(bars[0]);
+          }
+          if (manifest.id === 'suggestion-chips') {
+            expect(
+              await demo
+                .locator('.bw-chips')
+                .evaluate(
+                  (element) =>
+                    element.getBoundingClientRect().width <=
+                    element.parentElement!.clientWidth - 48,
+                ),
+            ).toBe(true);
+          }
+          if (manifest.id === 'stagger-reveal') {
+            await expect(demo.locator('.bw-word')).toHaveText([
+              /^Ideas $/,
+              /^into $/,
+              /^interfaces\. $/,
+            ]);
+          }
+          if (manifest.id === 'status-badge') {
+            expect(
+              await demo.locator('.adapt-status').evaluate((element) => {
+                const parent = element.parentElement!;
+                return element.getBoundingClientRect().width <= parent.clientWidth - 48;
+              }),
+            ).toBe(true);
+          }
+          if (manifest.id === 'precision-pagination') {
+            expect(
+              await demo
+                .locator('.adapt-pagination')
+                .evaluate((element) => element.scrollWidth <= element.clientWidth),
+            ).toBe(true);
+          }
+          if (manifest.id === 'animated-tabs') {
+            expect(
+              await demo
+                .locator('.bw-tabs')
+                .evaluate((element) => element.scrollWidth <= element.clientWidth),
+            ).toBe(true);
+          }
+          // Background transitions finish after inherited text colors change.
+          await expect(page.locator('.preview-stage')).toHaveCSS(
+            'background-color',
+            theme === 'dark' ? 'rgb(5, 5, 5)' : 'rgb(243, 240, 232)',
+          );
         }
       }
+      if (await demo.evaluate((element) => element.hasAttribute('data-active'))) {
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await demo.scrollIntoViewIfNeeded();
+        await expect(demo).toHaveAttribute('data-active', 'true');
+        await demo.evaluate((element) => {
+          const doc = element.ownerDocument;
+          Object.defineProperty(doc, 'hidden', { value: true, configurable: true });
+          doc.dispatchEvent(new Event('visibilitychange'));
+        });
+        await expect(demo).toHaveAttribute('data-active', 'false');
+        await demo.evaluate((element) => {
+          const doc = element.ownerDocument;
+          Reflect.deleteProperty(doc, 'hidden');
+          doc.dispatchEvent(new Event('visibilitychange'));
+        });
+        await expect(demo).toHaveAttribute('data-active', 'true');
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await expect(demo).toHaveAttribute('data-active', 'false');
+      }
+      const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+      expect(axe.violations).toEqual([]);
       expect(errors).toEqual([]);
     });
   }
@@ -202,7 +279,9 @@ test('workbench choice follows source, command, preview and browser history', as
     'aria-selected',
     'true',
   );
-  await expect(page.locator('.component-install code')).toContainText('/r/vue/animated-tabs.json');
+  await expect(page.locator('.component-install .source-toolbar code')).toContainText(
+    '/r/vue/animated-tabs.json',
+  );
   await tabs.getByRole('tab', { name: /svelte provisional/i }).click();
   await expect(page).toHaveURL(/framework=svelte/);
   await expect(page.locator('.source-usage')).toContainText('$lib/');

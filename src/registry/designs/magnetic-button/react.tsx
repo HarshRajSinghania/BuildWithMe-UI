@@ -16,6 +16,7 @@ export default function MagneticButton({
   return (
     <div ref={ref} className="bw-demo" data-active={active}>
       <motion.button
+        type="button"
         className="bw-button bw-magnetic"
         animate={active ? point : { x: 0, y: 0 }}
         transition={{ type: 'spring', stiffness: 220, damping: 14 }}

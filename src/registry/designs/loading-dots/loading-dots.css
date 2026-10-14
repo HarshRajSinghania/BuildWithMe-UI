@@ -1,3 +1,36 @@
 /* Adapted under MIT from https://github.com/vercel/examples/blob/main/internal/packages/ui/src/loading-dots.tsx. Copyright (c) Vercel, Inc.. */
-.adapt-loading{display:flex;gap:9px;align-items:center}.adapt-loading i{width:13px;height:13px;border-radius:50%;background:var(--bw-fg);animation:adapt-dot 1s ease-in-out infinite}.adapt-loading i:nth-of-type(2){animation-delay:.16s}.adapt-loading i:nth-of-type(3){animation-delay:.32s}@keyframes adapt-dot{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:1;transform:translateY(-9px)}}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-loading {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.adapt-loading i {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--bw-fg);
+  animation: adapt-dot 1s ease-in-out infinite;
+}
+.adapt-loading i:nth-of-type(2) {
+  animation-delay: 0.16s;
+}
+.adapt-loading i:nth-of-type(3) {
+  animation-delay: 0.32s;
+}
+@keyframes adapt-dot {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-9px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

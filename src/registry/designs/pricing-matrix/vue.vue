@@ -1,76 +1,85 @@
 <!-- MIT · BuildWithMe-UI contributors. Original implementation. -->
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
-import { observeMotion } from '../../shared/motion-lifecycle';
-
+import { computed, ref } from 'vue';
+import {
+  defaultPlans,
+  planPrice,
+  type PricingPlan,
+  type Billing,
+} from '../../shared/component-data';
 import '../../shared/base.css';
 import './pricing-matrix.css';
-const props = withDefaults(defineProps<{ label?: string; className?: string }>(), {
-  label: 'Pricing matrix',
-  className: '',
-});
-const root = ref<HTMLElement | null>(null);
-const active = ref(false);
-const reduced = ref(true);
-const uid = useId();
-let lifecycle: ReturnType<typeof observeMotion> | undefined;
-onMounted(() => {
-  if (root.value)
-    lifecycle = observeMotion(
-      root.value,
-      (state) => {
-        active.value = state.active;
-        reduced.value = state.reduced;
-      },
-      false,
-    );
-});
-watch(
-  () => false,
-  (value) => lifecycle?.setPaused(Boolean(value)),
+const props = withDefaults(
+  defineProps<{
+    label?: string;
+    className?: string;
+    plans?: readonly PricingPlan[];
+    billing?: Billing;
+    defaultBilling?: Billing;
+    selectedPlan?: string;
+  }>(),
+  { label: 'Pricing matrix', className: '', plans: () => defaultPlans, defaultBilling: 'monthly' },
 );
-onBeforeUnmount(() => lifecycle?.destroy());
-const yearly = ref(false);
-const selected = ref('');
-const plans = ['Starter', 'Studio', 'Team'];
-const prices = [0, 18, 42];
+const emit = defineEmits<{
+  'update:billing': [billing: Billing];
+  billingChange: [billing: Billing];
+  'update:selectedPlan': [id: string];
+  planSelect: [id: string];
+}>();
+const localBilling = ref<Billing>(props.defaultBilling);
+const localSelected = ref('');
+const currentBilling = computed(() => props.billing ?? localBilling.value);
+const selected = computed(() =>
+  props.plans.find((plan) => plan.id === (props.selectedPlan ?? localSelected.value)),
+);
+function toggle() {
+  const next = currentBilling.value === 'monthly' ? 'yearly' : 'monthly';
+  if (props.billing === undefined) localBilling.value = next;
+  emit('update:billing', next);
+  emit('billingChange', next);
+}
+function choose(id: string) {
+  if (props.selectedPlan === undefined) localSelected.value = id;
+  emit('update:selectedPlan', id);
+  emit('planSelect', id);
+}
 </script>
-
 <template>
-  <div
-    ref="root"
-    class="bw-demo"
-    :class="props.className"
-    :data-active="active"
-    data-component="pricing-matrix"
-  >
+  <section :class="`bw-demo bwm-pricing-matrix ${props.className}`">
     <div class="bwm-pricing">
       <h3>{{ props.label }}</h3>
       <div class="bwm-row">
-        <small>Example plans · no checkout</small
-        ><button type="button" class="bwm-control" :aria-pressed="yearly" @click="yearly = !yearly">
-          Yearly billing {{ yearly ? '✓' : '○' }}
+        <small>Example plans · no checkout</small>
+        <button
+          type="button"
+          class="bwm-control"
+          :aria-pressed="currentBilling === 'yearly'"
+          @click="toggle"
+        >
+          Yearly billing {{ currentBilling === 'yearly' ? '✓' : '○' }}
         </button>
       </div>
       <div class="bwm-plans">
-        <article v-for="(plan, i) in plans" :key="plan" class="bwm-panel">
-          <h4>{{ plan }}</h4>
-          <strong
-            >${{ yearly ? Math.round(prices[i] * 0.8) : prices[i] }}<small> / month</small></strong
-          >
+        <article v-for="plan in props.plans" :key="plan.id" class="bwm-panel">
+          <h4>{{ plan.name }}</h4>
+          <strong>${{ planPrice(plan, currentBilling) }}<small> / month</small></strong>
           <ul>
-            <li>{{ i === 0 ? 'Personal projects' : 'Unlimited projects' }}</li>
-            <li>{{ i === 2 ? 'Team workspace' : 'One workspace' }}</li>
-            <li>Keep your source</li>
+            <li v-for="(feature, i) in plan.features" :key="i">{{ feature }}</li>
           </ul>
-          <button type="button" :aria-pressed="selected === plan" @click="selected = plan">
-            Choose {{ plan }}
+          <button type="button" :aria-pressed="selected?.id === plan.id" @click="choose(plan.id)">
+            Choose {{ plan.name }}
           </button>
         </article>
       </div>
       <p role="status">
-        {{ selected ? `${selected} selected locally.` : 'Find room for your next idea.' }}
+        {{
+          !props.plans.length
+            ? 'No plans available.'
+            : selected
+              ? `${selected.name} selected locally.`
+              : 'Find room for your next idea.'
+        }}
       </p>
     </div>
-  </div>
+  </section>
 </template>

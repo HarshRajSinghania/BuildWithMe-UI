@@ -1,3 +1,31 @@
 /* Adapted under MIT from https://github.com/vercel/examples/blob/main/internal/packages/ui/src/snippet.tsx. Copyright (c) Vercel, Inc.. */
-.adapt-snippet{width:min(100%,540px);border:1px solid var(--bw-line);background:var(--bw-panel);margin:0}.adapt-snippet figcaption{display:flex;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bw-line);font:10px monospace}.adapt-snippet figcaption span{color:var(--bw-muted)}.adapt-snippet pre{margin:0;padding:24px;overflow:auto;color:var(--bw-muted);font:12px/1.8 monospace;white-space:pre-wrap}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-snippet {
+  width: min(100%, 540px);
+  border: 1px solid var(--bw-line);
+  background: var(--bw-panel);
+  margin: 0;
+}
+.adapt-snippet figcaption {
+  display: flex;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--bw-line);
+  font: 10px monospace;
+}
+.adapt-snippet figcaption span {
+  color: var(--bw-muted);
+}
+.adapt-snippet pre {
+  margin: 0;
+  padding: 24px;
+  overflow: auto;
+  color: var(--bw-muted);
+  font: 12px/1.8 monospace;
+  white-space: pre-wrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

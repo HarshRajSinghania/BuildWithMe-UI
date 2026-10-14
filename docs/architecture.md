@@ -28,7 +28,7 @@ The manifest uses a discriminated provenance model. Original work needs a creato
 
 `scripts/build-preview-runtimes.ts`, invoked by `previews:build`, separately generates isolated, code-split Vue and Svelte runtimes with Vite. Public handbook and root documentation are authored.
 
-Generated output is ignored by Git. Submitted code is never executed dynamically; only reviewed source included in generated maps can render. React previews mount through Next.js. Vue and Svelte previews mount inside same-origin iframes and communicate through a typed `theme`, `pause`, `replay`, `ready`, and `error` message protocol. A framework route loads only its selected runtime.
+Generated output is ignored by Git. Submitted code is never executed dynamically; only reviewed source included in generated maps can render. React previews mount through Next.js. Vue and Svelte previews mount inside same-origin iframes and communicate through a typed `theme`, `pause`, `replay`, `ping`, `ready`, and `error` message protocol. A framework route loads only its selected runtime.
 
 Every component surface accepts the public `data-bwm-theme="dark|light"` boundary. Component tokens inherit from the nearest boundary, which allows a dark artifact inside the light site and the inverse without ancestor-selector leakage.
 
@@ -55,3 +55,15 @@ The homepage story is configured in `src/lib/home-story.ts`. It validates its fe
 The Three.js universe is imported from a client boundary, reserves its dimensions, uses one instanced node mesh and one buffered line network, and pauses when the story is hidden or off-screen. The server-rendered SVG/CSS constellation remains available before hydration and is the final presentation for mobile, reduced motion, save-data, low-power, and WebGL failure modes. See `docs/motion-system.md` for budgets and verification.
 
 Global command search uses a native dialog and searches components, product domains, documentation, and frameworks. It is available from the header and with `Command/Ctrl + K` or `/` outside editable fields.
+
+## Readiness additions
+
+The catalog waits for `connection()` and renders filters/cards in the initial response. It does not use a short CSR fallback that shifts the footer during hydration. Standalone previews are non-indexable; indexable routes own their canonical URLs.
+
+Preview listeners stay attached across theme/visibility changes. A bounded startup handshake requests current readiness, failed bootstrap can reload the iframe, off-screen frames receive pause, and runtime generations prevent stale async replay mounts. Only reviewed loaders participate in this protocol.
+
+The registry data model provides optional application inputs and controlled state for Animated Tabs, Precision Pagination, Pricing Matrix, and Sortable Data Table. Framework-specific composition remains native. Live examples use those authored sources; distribution fixtures build the same examples against packed exports.
+
+Browser behavior and screenshot regressions are separate suites. Behavioral checks include the document inside each iframe, settled theme accessibility, and motion lifecycle signals. Visual captures focus on component roots; homepage captures retain full-page composition at the existing viewport sizes. All engines remain in the optional local matrix.
+
+Catalog filters operate on the delivered item list and compose URL edits synchronously with the supported native history API. Controls are disabled until hydration activates their handlers; server-rendered cards remain available without JavaScript. Search params still initialize bookmarked and reloaded filters. Failed native runtime retries replace the iframe browsing context and reconnect visibility observation, so an aborted module load cannot retain the old frame context. Standalone preview routes and generated runtime HTML declare noindex.

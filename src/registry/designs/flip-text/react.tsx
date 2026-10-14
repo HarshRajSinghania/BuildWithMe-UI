@@ -13,7 +13,8 @@ export default function FlipText({
   const { ref, active } = useAnimation(paused);
   return (
     <div ref={ref} className="bw-demo" data-active={active}>
-      <p className="adapt-flip" aria-label={label}>
+      <p className="adapt-flip">
+        <span className="bw-sr-only">{label}</span>
         {label.split('').map((letter, index) => (
           <span
             aria-hidden="true"

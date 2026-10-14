@@ -148,6 +148,15 @@ export function DocsNav() {
       <Link prefetch={false} href="/docs/installation">
         <BookOpen size={15} /> Installation
       </Link>
+      <Link prefetch={false} href="/examples/react">
+        Integration examples
+      </Link>
+      <Link prefetch={false} href="/docs/integrations">
+        Data & events
+      </Link>
+      <Link prefetch={false} href="/docs/showcase">
+        Showcase
+      </Link>
       <Link prefetch={false} href="/docs/frameworks">
         Frameworks
       </Link>

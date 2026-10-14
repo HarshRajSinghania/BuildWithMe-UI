@@ -1700,3 +1700,31 @@ body {
   min-width: 32px;
   min-height: 32px;
 }
+.install-prerequisite {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.install-guidance {
+  min-width: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.install-guidance summary {
+  cursor: pointer;
+  padding-block: 0.75rem;
+}
+.install-file-list {
+  padding-left: 1.25rem;
+  overflow-wrap: anywhere;
+}
+.install-guidance pre {
+  max-width: 100%;
+  overflow: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.docs-content section[id] {
+  scroll-margin-top: 6rem;
+}

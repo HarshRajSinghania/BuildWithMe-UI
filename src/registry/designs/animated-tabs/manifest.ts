@@ -51,6 +51,42 @@ export default defineManifest({
       default: 'false',
       description: 'Pause decorative animation while retaining interactive controls.',
     },
+    {
+      name: 'items',
+      type: 'readonly TabItem[]',
+      default: 'built-in workflow',
+      description: 'Tabs with unique IDs, labels, and optional text content.',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: 'uncontrolled',
+      description: 'Controlled active ID; Vue supports v-model:value.',
+    },
+    {
+      name: 'defaultValue',
+      type: 'string',
+      default: 'first item',
+      description: 'Initial uncontrolled active ID.',
+    },
+    {
+      name: 'label',
+      type: 'string',
+      default: 'Workflow',
+      description: 'Accessible tablist label.',
+    },
+    {
+      name: 'onValueChange',
+      type: '(id: string) => void',
+      default: 'undefined',
+      description: 'React/Svelte callback; Vue emits value-change and update:value.',
+    },
+    {
+      name: 'renderPanel / panel',
+      type: 'render function / slot / snippet',
+      default: 'item.content',
+      description: 'React renderPanel(item), Vue #panel={item}, Svelte panel(item).',
+    },
   ],
   provenance: {
     type: 'original',

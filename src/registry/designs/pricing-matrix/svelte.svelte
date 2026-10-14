@@ -1,67 +1,71 @@
 <!-- MIT · BuildWithMe-UI contributors. Original implementation. -->
 <script lang="ts">
-  import { tick } from 'svelte';
-  import { observeMotion } from '../../shared/motion-lifecycle';
-
+  import { untrack } from 'svelte';
+  import {
+    defaultPlans,
+    planPrice,
+    type Billing,
+    type PricingOptions,
+  } from '../../shared/component-data';
   import '../../shared/base.css';
   import './pricing-matrix.css';
-  let { label = 'Pricing matrix', className = '' }: { label?: string; className?: string } =
-    $props();
-  let root: HTMLDivElement;
-  let active = $state(false);
-  let reduced = $state(true);
-  const uid = $props.id();
-  $effect(() => {
-    if (!root) return;
-    const lifecycle = observeMotion(
-      root,
-      (state) => {
-        active = state.active;
-        reduced = state.reduced;
-      },
-      false,
-    );
-    return () => lifecycle.destroy();
-  });
-  let yearly = $state(false);
-  let selected = $state('');
-  const plans = ['Starter', 'Studio', 'Team'];
-  const prices = [0, 18, 42];
+  let {
+    label = 'Pricing matrix',
+    className = '',
+    plans = defaultPlans,
+    billing,
+    defaultBilling = 'monthly',
+    selectedPlan,
+    onBillingChange,
+    onPlanSelect,
+  }: PricingOptions = $props();
+  let localBilling = $state<Billing>(untrack(() => defaultBilling));
+  let localSelected = $state('');
+  const currentBilling = $derived(billing ?? localBilling);
+  const selected = $derived(plans.find((plan) => plan.id === (selectedPlan ?? localSelected)));
+  function toggle() {
+    const next = currentBilling === 'monthly' ? 'yearly' : 'monthly';
+    if (billing === undefined) localBilling = next;
+    onBillingChange?.(next);
+  }
+  function choose(id: string) {
+    if (selectedPlan === undefined) localSelected = id;
+    onPlanSelect?.(id);
+  }
 </script>
 
-<div
-  bind:this={root}
-  class={`bw-demo ${className ?? ''}`}
-  data-active={active}
-  data-component="pricing-matrix"
->
+<section class={`bw-demo bwm-pricing-matrix ${className}`}>
   <div class="bwm-pricing">
     <h3>{label}</h3>
     <div class="bwm-row">
-      <small>Example plans · no checkout</small><button
+      <small>Example plans · no checkout</small>
+      <button
         type="button"
         class="bwm-control"
-        aria-pressed={yearly}
-        onclick={() => (yearly = !yearly)}>Yearly billing {yearly ? '✓' : '○'}</button
+        aria-pressed={currentBilling === 'yearly'}
+        onclick={toggle}>Yearly billing {currentBilling === 'yearly' ? '✓' : '○'}</button
       >
     </div>
     <div class="bwm-plans">
-      {#each plans as plan, i (plan)}<article class="bwm-panel">
-          <h4>{plan}</h4>
-          <strong>${yearly ? Math.round(prices[i] * 0.8) : prices[i]}<small> / month</small></strong
-          >
+      {#each plans as plan (plan.id)}<article class="bwm-panel">
+          <h4>{plan.name}</h4>
+          <strong>${planPrice(plan, currentBilling)}<small> / month</small></strong>
           <ul>
-            <li>{i === 0 ? 'Personal projects' : 'Unlimited projects'}</li>
-            <li>{i === 2 ? 'Team workspace' : 'One workspace'}</li>
-            <li>Keep your source</li>
+            {#each plan.features as feature, i (i)}<li>{feature}</li>{/each}
           </ul>
-          <button type="button" aria-pressed={selected === plan} onclick={() => (selected = plan)}
-            >Choose {plan}</button
+          <button
+            type="button"
+            aria-pressed={selected?.id === plan.id}
+            onclick={() => choose(plan.id)}>Choose {plan.name}</button
           >
         </article>{/each}
     </div>
     <p role="status">
-      {selected ? `${selected} selected locally.` : 'Find room for your next idea.'}
+      {!plans.length
+        ? 'No plans available.'
+        : selected
+          ? `${selected.name} selected locally.`
+          : 'Find room for your next idea.'}
     </p>
   </div>
-</div>
+</section>

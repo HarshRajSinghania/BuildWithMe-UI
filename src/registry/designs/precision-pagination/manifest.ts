@@ -59,6 +59,30 @@ export default defineManifest({
       default: 'false',
       description: 'Pauses decorative animation.',
     },
+    {
+      name: 'page',
+      type: 'number',
+      default: 'uncontrolled',
+      description: 'Controlled one-based page; Vue supports v-model:page.',
+    },
+    {
+      name: 'defaultPage',
+      type: 'number',
+      default: '2',
+      description: 'Initial uncontrolled page.',
+    },
+    {
+      name: 'pageCount',
+      type: 'number',
+      default: '4',
+      description: 'Total pages; non-finite or non-positive values render one page.',
+    },
+    {
+      name: 'onPageChange',
+      type: '(page: number) => void',
+      default: 'undefined',
+      description: 'React/Svelte callback; Vue emits page-change and update:page.',
+    },
   ],
   provenance: {
     type: 'adapted',
@@ -71,7 +95,7 @@ export default defineManifest({
     upstreamAuthor: 'Vercel, Inc.',
     upstreamLicense: 'MIT',
     modification:
-      'Reimplemented as a dependency-light, monochrome, theme-aware design with React, Vue, and Svelte source variants and reduced-motion behavior. Kinetic Playground repair (2026-10-05): framework-native behavior, scoped motion lifecycle, complete source closure, and corrected source usage; original upstream notices retained.',
+      'Reimplemented as a dependency-light, monochrome, theme-aware design with React, Vue, and Svelte source variants and reduced-motion behavior. Kinetic Playground repair (2026-10-05): framework-native behavior, scoped motion lifecycle, complete source closure, and corrected source usage; original upstream notices retained. Readiness update (2026-10-07): configurable page count, controlled page and native framework change events.',
   },
   related: [],
   style: 'designs/precision-pagination/precision-pagination.css',

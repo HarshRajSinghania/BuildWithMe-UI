@@ -30,6 +30,7 @@ export function observeMotion(
     }
   }
   const visibility = new view.IntersectionObserver(([entry]) => {
+    if (!entry) return;
     visible = entry.isIntersecting;
     update();
   });

@@ -13,7 +13,12 @@ export default function ToolCallPanel({ paused = false }: AnimationProps) {
     <div ref={ref} className="bw-demo" data-active={active}>
       <div className="bw-panel bw-tool">
         <p className="bw-caption">Local demonstration</p>
-        <button aria-expanded={open} aria-controls={id} onClick={() => setOpen((v) => !v)}>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={() => setOpen((v) => !v)}
+        >
           <span>
             <span className="bw-tool-dot" />
             search_components

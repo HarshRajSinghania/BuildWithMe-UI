@@ -1,4 +1,50 @@
 /* Adapted under MIT from https://github.com/vercel/registry-starter/blob/main/src/components/login.tsx. Copyright (c) Vercel, Inc.. */
-.adapt-login{width:min(100%,350px);display:grid;gap:14px;border:1px solid var(--bw-line);background:var(--bw-panel);padding:24px}.adapt-login>span{font:9px monospace;color:var(--bw-muted)}.adapt-login h3{font-size:28px;margin:12px 0}.adapt-login label{display:grid;gap:7px;font-size:11px;color:var(--bw-muted)}.adapt-login input{height:42px;border:1px solid var(--bw-line);background:var(--bw-bg);color:var(--bw-fg);padding:0 12px}.adapt-login button{height:44px;border:0;background:var(--bw-fg);color:var(--bw-bg);margin-top:4px}
-.adapt-login-status{min-height:1.2em;margin:0;color:var(--bw-muted);font:10px/1.2 monospace;text-align:center}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-login {
+  width: min(100%, 350px);
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--bw-line);
+  background: var(--bw-panel);
+  padding: 24px;
+}
+.adapt-login > span {
+  font: 9px monospace;
+  color: var(--bw-muted);
+}
+.adapt-login h3 {
+  font-size: 28px;
+  margin: 12px 0;
+}
+.adapt-login label {
+  display: grid;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--bw-muted);
+}
+.adapt-login input {
+  height: 42px;
+  border: 1px solid var(--bw-line);
+  background: var(--bw-bg);
+  color: var(--bw-fg);
+  padding: 0 12px;
+}
+.adapt-login button {
+  height: 44px;
+  border: 0;
+  background: var(--bw-fg);
+  color: var(--bw-bg);
+  margin-top: 4px;
+}
+.adapt-login-status {
+  min-height: 1.2em;
+  margin: 0;
+  color: var(--bw-muted);
+  font: 10px/1.2 monospace;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

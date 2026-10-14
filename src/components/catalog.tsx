@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useDeferredValue, useEffect, useMemo, useState, useTransition } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { ArrowUpRight, Search, SlidersHorizontal, X } from 'lucide-react';
 import { Preview } from './preview';
 import { domainLabels } from '@/registry/schema';
@@ -21,7 +21,6 @@ type Item = {
 };
 
 export function Catalog({ items }: { items: Item[] }) {
-  const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
   const [query, setQuery] = useState(params.get('q') ?? '');
@@ -30,7 +29,8 @@ export function Catalog({ items }: { items: Item[] }) {
   const [engine, setEngine] = useState(params.get('engine') ?? 'all');
   const [method, setMethod] = useState(params.get('method') ?? 'all');
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [, startTransition] = useTransition();
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
   useEffect(() => {
     setQuery(params.get('q') ?? '');
     setDomain(params.get('domain') ?? 'all');
@@ -40,14 +40,14 @@ export function Catalog({ items }: { items: Item[] }) {
   }, [params]);
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   function update(next: Record<string, string>) {
-    const values = { q: query, domain, framework, engine, method, ...next };
-    const search = new URLSearchParams();
-    Object.entries(values).forEach(([key, value]) => {
+    // Filters operate on the already delivered catalog. Update the URL
+    // synchronously so rapid edits compose instead of racing server navigation.
+    const search = new URLSearchParams(window.location.search);
+    Object.entries(next).forEach(([key, value]) => {
       if (value && value !== 'all') search.set(key, value);
+      else search.delete(key);
     });
-    startTransition(() =>
-      router.replace(`${pathname}${search.size ? `?${search}` : ''}`, { scroll: false }),
-    );
+    window.history.replaceState(null, '', `${pathname}${search.size ? `?${search}` : ''}`);
   }
   const filtered = useMemo(
     () =>
@@ -78,7 +78,7 @@ export function Catalog({ items }: { items: Item[] }) {
     setFramework('all');
     setEngine('all');
     setMethod('all');
-    router.replace(pathname, { scroll: false });
+    window.history.replaceState(null, '', pathname);
   }
   const active =
     query || domain !== 'all' || framework !== 'all' || engine !== 'all' || method !== 'all';
@@ -89,6 +89,7 @@ export function Catalog({ items }: { items: Item[] }) {
           <Search size={14} />
           <span className="sr-only">Search components</span>
           <input
+            disabled={!hydrated}
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -99,6 +100,7 @@ export function Catalog({ items }: { items: Item[] }) {
         </label>
         <div className="catalog-filter-drawer">
           <button
+            disabled={!hydrated}
             type="button"
             className="filter-drawer-trigger"
             aria-expanded={filtersOpen}
@@ -109,6 +111,7 @@ export function Catalog({ items }: { items: Item[] }) {
           </button>
           <div className="catalog-filters" id="catalog-filters">
             <select
+              disabled={!hydrated}
               aria-label="Filter by product domain"
               value={domain}
               onChange={(e) => {
@@ -124,6 +127,7 @@ export function Catalog({ items }: { items: Item[] }) {
               ))}
             </select>
             <select
+              disabled={!hydrated}
               aria-label="Filter by framework"
               value={framework}
               onChange={(e) => {
@@ -137,6 +141,7 @@ export function Catalog({ items }: { items: Item[] }) {
               <option value="svelte">Svelte</option>
             </select>
             <select
+              disabled={!hydrated}
               aria-label="Filter by engine"
               value={engine}
               onChange={(e) => {
@@ -150,6 +155,7 @@ export function Catalog({ items }: { items: Item[] }) {
               <option value="animejs">Anime.js</option>
             </select>
             <select
+              disabled={!hydrated}
               aria-label="Filter by installation"
               value={method}
               onChange={(e) => {
@@ -169,7 +175,7 @@ export function Catalog({ items }: { items: Item[] }) {
         {active ? (
           <div className="active-filters">
             <span role="status">{filtered.length} matching designs</span>
-            <button onClick={reset}>
+            <button disabled={!hydrated} onClick={reset}>
               Reset <X size={11} />
             </button>
           </div>
@@ -212,7 +218,7 @@ export function Catalog({ items }: { items: Item[] }) {
             <Search size={28} />
             <h2>No design matches that combination.</h2>
             <p>Remove a filter or search with a broader phrase.</p>
-            <button className="button button-light" onClick={reset}>
+            <button disabled={!hydrated} className="button button-light" onClick={reset}>
               Clear filters
             </button>
           </div>

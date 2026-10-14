@@ -7,14 +7,15 @@
   padding: 5px;
   border: 1px solid var(--bw-border);
   border-radius: 10px;
+  overflow-x: auto;
 }
-.bw-tabs button {
+.bw-demo .bw-tabs button {
   background: none;
   border: 0;
   color: var(--bw-muted);
-  padding: 10px 14px;
+  padding: 10px 8px;
   position: relative;
-  flex: 1;
+  flex: 1 0 auto;
   font-size: 12px;
 }
 .bw-tabs button span {

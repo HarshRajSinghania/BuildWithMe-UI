@@ -52,7 +52,7 @@
     disabled={status === 'working'}
     aria-busy={status === 'working'}
     onclick={run}
-    ><span role="status"
+    ><span aria-live="polite"
       >{status === 'working'
         ? 'Saving…'
         : status === 'done'

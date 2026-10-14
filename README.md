@@ -67,3 +67,15 @@ Run `pnpm env:validate` in the production environment before deploying. It rejec
 ## License
 
 Original project code is MIT licensed. Adapted and remixed designs retain their recorded upstream licenses and provenance. See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Integration and release readiness
+
+Try `/examples/react`, `/examples/vue`, and `/examples/svelte` for custom data, controlled values, callback payloads, composition, form actions, and save recovery. See [compatibility and API guidance](docs/compatibility.md).
+
+- `pnpm test:e2e:behavior` runs behavior, accessibility, iframe bounds, motion lifecycle, and integration acceptance independently of visual baselines.
+- `pnpm test:e2e:visual` runs the reviewed screenshot suite in all three engines.
+- `pnpm test:install:cli` exercises the advertised shadcn installation command in configured consumers.
+- `pnpm performance:smoke` records repeatable production-page lab samples in ignored `tmp/` artifacts.
+- `pnpm check:release` runs the explicit full release gate; automatic CI remains lightweight.
+
+See the [changelog](CHANGELOG.md), [manual release checklist](docs/releasing.md), and [focused contributor backlog](docs/contributor-backlog.md). Framework verification remains provisional where acceptance evidence is incomplete. Nothing in these checks automatically publishes packages or deploys the website.

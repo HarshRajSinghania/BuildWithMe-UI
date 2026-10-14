@@ -1,3 +1,42 @@
 /* Adapted under MIT from https://github.com/Ashutoshx7/VengeanceUI/blob/main/src/components/ui/elastic-stack.tsx. Copyright (c) Ashutoshx7. */
-.adapt-elastic{width:min(100%,520px);display:flex;gap:6px}.adapt-elastic button{min-width:54px;flex:1;height:170px;border:1px solid var(--bw-line);background:var(--bw-panel);display:flex;flex-direction:column;justify-content:space-between;padding:14px;transition:flex .35s ease,background .2s}.adapt-elastic button:hover,.adapt-elastic button:focus-visible{flex:2.4;background:var(--bw-fg);color:var(--bw-bg)}.adapt-elastic span{font:10px monospace}.adapt-elastic b{writing-mode:vertical-rl;transform:rotate(180deg);font-size:12px;text-transform:uppercase;letter-spacing:.12em}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-elastic {
+  width: min(100%, 520px);
+  display: flex;
+  gap: 6px;
+}
+.adapt-elastic button {
+  min-width: 54px;
+  flex: 1;
+  height: 170px;
+  border: 1px solid var(--bw-line);
+  background: var(--bw-panel);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  transition:
+    flex 0.35s ease,
+    background 0.2s;
+}
+.adapt-elastic button:hover,
+.adapt-elastic button:focus-visible {
+  flex: 2.4;
+  background: var(--bw-fg);
+  color: var(--bw-bg);
+}
+.adapt-elastic span {
+  font: 10px monospace;
+}
+.adapt-elastic b {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
