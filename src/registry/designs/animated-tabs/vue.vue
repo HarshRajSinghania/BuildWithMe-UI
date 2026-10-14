@@ -5,7 +5,18 @@ import { observeMotion } from '../../shared/motion-lifecycle';
 
 import '../../shared/base.css';
 import './animated-tabs.css';
-const props = withDefaults(defineProps<{ paused?: boolean }>(), { paused: false });
+import { defaultTabs, selectedTab, type TabItem } from '../../shared/component-data';
+const props = withDefaults(
+  defineProps<{
+    paused?: boolean;
+    items?: readonly TabItem[];
+    value?: string;
+    defaultValue?: string;
+    label?: string;
+  }>(),
+  { paused: false, items: () => defaultTabs, label: 'Workflow' },
+);
+const emit = defineEmits<{ 'update:value': [value: string]; valueChange: [value: string] }>();
 const root = ref<HTMLElement | null>(null);
 const active = ref(false);
 const reduced = ref(true);
@@ -27,27 +38,29 @@ watch(
   (value) => lifecycle?.setPaused(Boolean(value)),
 );
 onBeforeUnmount(() => lifecycle?.destroy());
-const tabs = ['Design', 'Develop', 'Deliver'];
-const copy = [
-  'A good idea deserves a thoughtful interface.',
-  'Turn the details into something that works.',
-  'Put it into the world. Keep making it better.',
-];
-const selected = ref(0);
+const localValue = ref(props.defaultValue ?? props.items[0]?.id);
+const selected = computed(() => selectedTab(props.items, props.value ?? localValue.value));
+function choose(value: string) {
+  if (props.value === undefined) localValue.value = value;
+  emit('update:value', value);
+  emit('valueChange', value);
+}
 async function navigate(event: KeyboardEvent, index: number) {
+  const length = props.items.length;
   const next =
     event.key === 'Home'
       ? 0
       : event.key === 'End'
-        ? 2
+        ? length - 1
         : event.key === 'ArrowRight'
-          ? (index + 1) % 3
+          ? (index + 1) % length
           : event.key === 'ArrowLeft'
-            ? (index + 2) % 3
+            ? (index + length - 1) % length
             : -1;
-  if (next < 0) return;
+  const item = props.items[next];
+  if (!item) return;
   event.preventDefault();
-  selected.value = next;
+  choose(item.id);
   await nextTick();
   root.value?.querySelectorAll<HTMLButtonElement>('[role=tab]')[next]?.focus();
 }
@@ -56,31 +69,36 @@ async function navigate(event: KeyboardEvent, index: number) {
 <template>
   <div ref="root" class="bw-demo" :data-active="active" data-component="animated-tabs">
     <div class="bw-tab-box">
-      <div class="bw-tabs" role="tablist" aria-label="Workflow">
-        <button
-          v-for="(tab, index) in tabs"
-          :key="tab"
-          type="button"
-          :id="`${uid}-tab-${index}`"
-          role="tab"
-          :aria-selected="selected === index"
-          :aria-controls="`${uid}-panel-${index}`"
-          :tabindex="selected === index ? 0 : -1"
-          @click="selected = index"
-          @keydown="navigate($event, index)"
+      <template v-if="selected">
+        <div class="bw-tabs" role="tablist" :aria-label="props.label">
+          <button
+            v-for="(item, index) in props.items"
+            :key="item.id"
+            type="button"
+            :id="`${uid}-tab-${index}`"
+            role="tab"
+            :aria-selected="selected.id === item.id"
+            :aria-controls="`${uid}-panel`"
+            :tabindex="selected.id === item.id ? 0 : -1"
+            @click="choose(item.id)"
+            @keydown="navigate($event, index)"
+          >
+            <span v-if="selected.id === item.id" class="bw-tab-indicator" /><span>{{
+              item.label
+            }}</span>
+          </button>
+        </div>
+        <div
+          class="bw-description bw-tab-copy"
+          role="tabpanel"
+          :id="`${uid}-panel`"
+          :aria-labelledby="`${uid}-tab-${props.items.indexOf(selected)}`"
+          tabindex="0"
         >
-          <span v-if="selected === index" class="bw-tab-indicator" /><span>{{ tab }}</span>
-        </button>
-      </div>
-      <div
-        class="bw-description bw-tab-copy"
-        role="tabpanel"
-        :id="`${uid}-panel-${selected}`"
-        :aria-labelledby="`${uid}-tab-${selected}`"
-        tabindex="0"
-      >
-        {{ copy[selected] }}
-      </div>
+          <slot name="panel" :item="selected">{{ selected.content }}</slot>
+        </div>
+      </template>
+      <p v-else class="bw-description">No tabs available.</p>
     </div>
   </div>
 </template>

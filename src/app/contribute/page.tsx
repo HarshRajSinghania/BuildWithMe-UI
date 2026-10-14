@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowUpRight, BookOpen, Code2, Github } from 'lucide-react';
 import { repositoryUrl } from '@/lib/registry';
 
-export const metadata = { title: 'Build with us' };
+export const metadata = { alternates: { canonical: '/contribute' }, title: 'Build with us' };
 
 const firstIssues = `${repositoryUrl}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22`;
 

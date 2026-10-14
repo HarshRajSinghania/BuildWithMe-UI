@@ -1,3 +1,41 @@
 /* Adapted under MIT from https://github.com/vercel/registry-starter/blob/main/src/components/ui/badge.tsx. Copyright (c) Vercel, Inc.. */
-.adapt-status{min-width:290px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--bw-line);background:var(--bw-panel);font:11px monospace}.adapt-status i{width:9px;height:9px;border-radius:50%;background:#28a56a;box-shadow:0 0 12px #28a56a}.adapt-status time{color:var(--bw-muted);font-size:9px}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-status {
+  width: min(100%, 290px);
+  max-width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--bw-line);
+  background: var(--bw-panel);
+  font: 11px monospace;
+}
+.adapt-status i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #28a56a;
+  box-shadow: 0 0 12px #28a56a;
+}
+.adapt-status small,
+.adapt-status time {
+  color: var(--bw-muted);
+  font-size: 9px;
+}
+@media (max-width: 440px) {
+  .adapt-status {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .adapt-status small,
+  .adapt-status time {
+    grid-column: 2;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -12,7 +12,7 @@ export default function PressDepthButton({
   const { ref, active } = useAnimation(paused);
   return (
     <div ref={ref} className="bw-demo" data-active={active}>
-      <button className="bw-button bw-depth" onClick={onClick}>
+      <button type="button" className="bw-button bw-depth" onClick={onClick}>
         {label}
       </button>
     </div>

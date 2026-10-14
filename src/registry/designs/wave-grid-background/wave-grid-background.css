@@ -1,3 +1,29 @@
 /* Adapted under MIT from https://github.com/Ashutoshx7/VengeanceUI/blob/main/src/components/ui/wave-grid-background.tsx. Copyright (c) Ashutoshx7. */
-.adapt-wave{width:min(100%,470px);height:230px;display:grid;grid-template-columns:repeat(7,1fr);gap:7px;align-items:center;perspective:500px;transform:rotateX(55deg) rotateZ(-8deg)}.adapt-wave i{aspect-ratio:1;border:1px solid var(--bw-line);background:var(--bw-panel);animation:adapt-wave 2.8s ease-in-out infinite}@keyframes adapt-wave{50%{transform:translateZ(42px);background:var(--bw-fg)}}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-wave {
+  width: min(100%, 470px);
+  height: 230px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 7px;
+  align-items: center;
+  perspective: 500px;
+  transform: rotateX(55deg) rotateZ(-8deg);
+}
+.adapt-wave i {
+  aspect-ratio: 1;
+  border: 1px solid var(--bw-line);
+  background: var(--bw-panel);
+  animation: adapt-wave 2.8s ease-in-out infinite;
+}
+@keyframes adapt-wave {
+  50% {
+    transform: translateZ(42px);
+    background: var(--bw-fg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

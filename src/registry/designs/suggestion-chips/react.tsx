@@ -20,6 +20,7 @@ export default function SuggestionChips({
         <p className="bw-caption">A place to start</p>
         {options.map((text) => (
           <motion.button
+            type="button"
             key={text}
             whileHover={active ? { x: 4 } : undefined}
             aria-pressed={selected === text}

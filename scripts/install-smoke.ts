@@ -5,11 +5,48 @@ import { compile } from 'svelte/compiler';
 import { verifySourceInstall } from './verify-source-install';
 import { validateRegistry } from './registry';
 import { createInstallFixture } from './install-fixture';
+import ts from 'typescript';
 
 const root = process.cwd();
 const pnpmExecutable = process.env.npm_execpath;
 if (!pnpmExecutable) throw new Error('Run this script through pnpm.');
 const pnpmPath: string = pnpmExecutable;
+// Build the same reviewed live example against packed exports, not workspace imports.
+async function consumerExample(framework: 'react' | 'vue' | 'svelte', directory: string) {
+  const extension =
+    framework === 'react' ? 'react.tsx' : framework === 'vue' ? 'vue.vue' : 'svelte.svelte';
+  const source = await fs.readFile(
+    path.join(root, 'src/registry/examples/integration', extension),
+    'utf8',
+  );
+  const model =
+    "type Billing = 'monthly' | 'yearly'; type TableSort = { key: 'name' | 'status'; direction: 'ascending' | 'descending' }; const defaultTableSort: TableSort = { key: 'name', direction: 'ascending' };";
+  const packaged = source
+    .replace(
+      /(['"])\.\.\/\.\.\/designs\/([^/]+)\/(?:react|vue\.vue|svelte\.svelte)\1/g,
+      (_match, quote, id) => `${quote}@buildwithme/${framework}/${id}${quote}`,
+    )
+    .replace(
+      /import \{ defaultTableSort, type Billing, type TableSort \} from ['"]\.\.\/\.\.\/shared\/component-data['"];/,
+      model,
+    );
+  await fs.mkdir(directory, { recursive: true });
+  await fs.writeFile(path.join(directory, extension), packaged);
+  const data = await fs.readFile(
+    path.join(root, 'src/registry/examples/integration/data.ts'),
+    'utf8',
+  );
+  await fs.writeFile(
+    path.join(directory, 'data.ts'),
+    ts.transpileModule(data, {
+      compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+    }).outputText,
+  );
+  await fs.copyFile(
+    path.join(root, 'src/registry/examples/integration/examples.css'),
+    path.join(directory, 'examples.css'),
+  );
+}
 async function run(args: string[], cwd = root) {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(process.execPath, [pnpmPath, ...args], {
@@ -87,7 +124,7 @@ await fs.writeFile(
     scripts: { build: 'next build' },
     dependencies: {
       '@buildwithme/react': packageTarball('react'),
-      next: '16.3.6',
+      next: '16.3.8',
       react: '19.3.0',
       'react-dom': '19.3.0',
       motion: '13.4.4',
@@ -102,13 +139,14 @@ await fs.writeFile(
   }),
 );
 await fs.mkdir(path.join(fixture, 'app'), { recursive: true });
+await consumerExample('react', path.join(fixture, 'app'));
 await fs.writeFile(
   path.join(fixture, 'app', 'layout.tsx'),
   "import '@buildwithme/react/styles.css';export default function Layout({children}:{children:React.ReactNode}){return <html><body>{children}</body></html>}",
 );
 await fs.writeFile(
   path.join(fixture, 'app', 'page.tsx'),
-  `import * as UI from '@buildwithme/react';${individualImports('react')}const individual=[${individualNames}];export default function Page(){return <main><h1>${designCount} components installed</h1>{Object.entries(UI).map(([name,Component])=><section key={name}><h2>{name}</h2><Component /></section>)}{individual.map((Component,index)=><section key={index}><Component/></section>)}</main>}`,
+  `import IntegrationExample from './react';import * as UI from '@buildwithme/react';${individualImports('react')}const individual=[${individualNames}];export default function Page(){return <main><h1>${designCount} components installed</h1><IntegrationExample/>{Object.entries(UI).map(([name,Component])=><section key={name}><h2>{name}</h2><Component /></section>)}{individual.map((Component,index)=><section key={index}><Component/></section>)}</main>}`,
 );
 await fs.writeFile(
   path.join(fixture, 'tsconfig.json'),
@@ -137,6 +175,7 @@ await run(['build'], fixture);
 
 const vuePackage = packageTarball('vue');
 const nuxtFixture = await createInstallFixture(root, 'nuxt-package-');
+await consumerExample('vue', nuxtFixture);
 await fs.writeFile(
   path.join(nuxtFixture, 'package.json'),
   JSON.stringify({
@@ -152,7 +191,7 @@ await fs.writeFile(
 );
 await fs.writeFile(
   path.join(nuxtFixture, 'app.vue'),
-  `<script setup lang="ts">import * as UI from '@buildwithme/vue';${individualImports('vue')}import '@buildwithme/vue/styles.css';const components=Object.entries(UI);const individual=[${individualNames}];</script><template><main><h1>{{components.length}} components installed</h1><section v-for="[name,Component] in components" :key="name"><h2>{{name}}</h2><component :is="Component"/></section><component v-for="(Component,index) in individual" :key="index" :is="Component"/></main></template>`,
+  `<script setup lang="ts">import IntegrationExample from './vue.vue';import * as UI from '@buildwithme/vue';${individualImports('vue')}import '@buildwithme/vue/styles.css';const components=Object.entries(UI);const individual=[${individualNames}];</script><template><main><h1>{{components.length}} components installed</h1><IntegrationExample/><section v-for="[name,Component] in components" :key="name"><h2>{{name}}</h2><component :is="Component"/></section><component v-for="(Component,index) in individual" :key="index" :is="Component"/></main></template>`,
 );
 await run(['install', '--no-frozen-lockfile'], nuxtFixture);
 await run(['build'], nuxtFixture);
@@ -184,13 +223,14 @@ await fs.writeFile(
   "import {sveltekit} from '@sveltejs/kit/vite';import {defineConfig} from 'vite';export default defineConfig({plugins:[sveltekit()]});",
 );
 await fs.mkdir(path.join(svelteKitFixture, 'src', 'routes'), { recursive: true });
+await consumerExample('svelte', path.join(svelteKitFixture, 'src', 'routes'));
 await fs.writeFile(
   path.join(svelteKitFixture, 'src', 'app.html'),
   '<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width"/>%sveltekit.head%</head><body data-sveltekit-preload-data="hover"><div style="display: contents">%sveltekit.body%</div></body></html>',
 );
 await fs.writeFile(
   path.join(svelteKitFixture, 'src', 'routes', '+page.svelte'),
-  `<script lang="ts">import * as UI from '@buildwithme/svelte';${individualImports('svelte')}const components=Object.entries(UI);const individual=[${individualNames}];</script><svelte:head><title>BuildWithMe smoke</title></svelte:head><main><h1>{components.length} components installed</h1>{#each components as [name,Component] (name)}<section><h2>{name}</h2><Component/></section>{/each}{#each individual as Component,index (index)}<Component/>{/each}</main>`,
+  `<script lang="ts">import IntegrationExample from './svelte.svelte';import * as UI from '@buildwithme/svelte';${individualImports('svelte')}const components=Object.entries(UI);const individual=[${individualNames}];</script><svelte:head><title>BuildWithMe smoke</title></svelte:head><main><h1>{components.length} components installed</h1><IntegrationExample/>{#each components as [name,Component] (name)}<section><h2>{name}</h2><Component/></section>{/each}{#each individual as Component,index (index)}<Component/>{/each}</main>`,
 );
 await run(['install', '--no-frozen-lockfile'], svelteKitFixture);
 await run(['build'], svelteKitFixture);

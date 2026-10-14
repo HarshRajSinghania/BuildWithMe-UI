@@ -103,7 +103,7 @@ test('detail supports preview controls, framework source, and copy failure recov
   await expect(vueTab).toBeFocused();
   await expect(page).toHaveURL(/framework=vue/);
   await expect(page.locator('.source-block')).toContainText('<template>');
-  await expect(page.locator('.component-install code')).toContainText(
+  await expect(page.locator('.component-install .source-toolbar code')).toContainText(
     '/r/vue/magnetic-button.json',
   );
   await vueTab.press('End');
@@ -174,29 +174,6 @@ test('invalid component route returns the designed 404', async ({ page }) => {
   await expect(page.getByRole('heading')).toBeVisible();
 });
 
-for (const theme of ['dark', 'light'] as const) {
-  for (const width of [360, 768, 1280, 1536]) {
-    test(`${theme} homepage at ${width}`, async ({ page }) => {
-      await page.setViewportSize({ width, height: 1000 });
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.addInitScript(
-        (selectedTheme) => localStorage.setItem('theme', selectedTheme),
-        theme,
-      );
-      await page.goto('/');
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-      await expect(page.getByRole('combobox', { name: 'Color theme' })).toHaveValue(theme);
-      expect(
-        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-      ).toBe(true);
-      await expect(page).toHaveScreenshot(`home-${theme}-${width}.png`, {
-        animations: 'disabled',
-        maxDiffPixelRatio: 0.01,
-      });
-    });
-  }
-}
-
 test('reduced motion uses the static hero and every React preview renders', async ({ page }) => {
   test.setTimeout(120000);
   const pageErrors: string[] = [];
@@ -207,11 +184,15 @@ test('reduced motion uses the static hero and every React preview renders', asyn
   await expect(page.locator('.cosmos-canvas')).toHaveCount(0);
   const index = await (await page.request.get('/index.v2.json')).json();
   expect(index.items).toHaveLength(55);
+  await page.waitForLoadState('networkidle');
   for (const item of index.items) {
     await page.goto(`/preview/${item.id}/react`);
     await expect(page.getByText('This preview could not load.')).toHaveCount(0);
     await expect(page.locator('.preview-stage')).toBeVisible();
     await expect(page.locator('.preview-stage > :not(.preview-loading)').first()).toBeVisible();
+    // Finish this document's prefetches before deliberately navigating away.
+    // WebKit reports cancelled document fetches as errors during a rapid unload.
+    await page.waitForLoadState('networkidle');
   }
   expect(pageErrors).toEqual([]);
 });

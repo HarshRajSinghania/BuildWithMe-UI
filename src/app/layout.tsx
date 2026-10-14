@@ -21,7 +21,6 @@ const publicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://build-with-me
 const socialImages = [`${publicSiteUrl}/opengraph-image`];
 export const metadata: Metadata = {
   metadataBase: new URL(publicSiteUrl),
-  alternates: { canonical: '/' },
   title: {
     default: 'BuildWithMe UI — Build the interface. Keep the source.',
     template: '%s · BuildWithMe UI',

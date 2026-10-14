@@ -1,3 +1,32 @@
 /* Adapted under MIT from https://github.com/Ashutoshx7/VengeanceUI/blob/main/src/components/ui/kinetic-text-loader.tsx. Copyright (c) Ashutoshx7. */
-.adapt-kinetic{width:min(100%,430px);overflow:hidden;border-block:1px solid var(--bw-line);padding:16px 0;display:grid;gap:8px;font:700 24px/1 monospace;white-space:nowrap}.adapt-kinetic span{display:block;width:max-content;animation:adapt-track 7s linear infinite}.adapt-kinetic span+span{color:transparent;-webkit-text-stroke:1px var(--bw-muted);animation-direction:reverse}@keyframes adapt-track{to{transform:translateX(-45%)}}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-kinetic {
+  width: min(100%, 430px);
+  overflow: hidden;
+  border-block: 1px solid var(--bw-line);
+  padding: 16px 0;
+  display: grid;
+  gap: 8px;
+  font: 700 24px/1 monospace;
+  white-space: nowrap;
+}
+.adapt-kinetic span {
+  display: block;
+  width: max-content;
+  animation: adapt-track 7s linear infinite;
+}
+.adapt-kinetic span + span {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--bw-muted);
+  animation-direction: reverse;
+}
+@keyframes adapt-track {
+  to {
+    transform: translateX(-45%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

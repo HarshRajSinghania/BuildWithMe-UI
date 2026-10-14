@@ -5,6 +5,8 @@ export default defineConfig({
   workers: 2,
   timeout: 45000,
   expect: { timeout: 10000 },
+  snapshotPathTemplate:
+    '{testDir}/visual-regressions.spec.ts-snapshots/{arg}-{projectName}-{platform}{ext}',
   reporter: [['list'], ['html', { open: 'never' }]],
   use: { baseURL: 'http://127.0.0.1:3000', trace: 'retain-on-failure' },
   projects: [

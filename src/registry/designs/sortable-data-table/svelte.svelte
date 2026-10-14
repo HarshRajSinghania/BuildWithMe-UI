@@ -1,89 +1,104 @@
 <!-- MIT · BuildWithMe-UI contributors. Original implementation. -->
 <script lang="ts">
-  import { tick } from 'svelte';
-  import { observeMotion } from '../../shared/motion-lifecycle';
-
+  import { untrack, type Snippet } from 'svelte';
+  import {
+    defaultRows,
+    defaultTableSort,
+    sortRows,
+    nextSort,
+    type TableOptions,
+    type TableRow,
+    type SortKey,
+  } from '../../shared/component-data';
   import '../../shared/base.css';
   import './sortable-data-table.css';
-  let { className = '', label = 'Sortable data table' }: { label?: string } = $props();
-  let root: HTMLDivElement;
-  let active = $state(false);
-  let reduced = $state(true);
-  const uid = $props.id();
-  $effect(() => {
-    if (!root) return;
-    const lifecycle = observeMotion(
-      root,
-      (state) => {
-        active = state.active;
-        reduced = state.reduced;
-      },
-      false,
-    );
-    return () => lifecycle.destroy();
-  });
-  const rows = [
-    { id: 'aurora', name: 'Aurora', status: 'Ready' },
-    { id: 'orbit', name: 'Orbit', status: 'Review' },
-    { id: 'signal', name: 'Signal', status: 'Ready' },
-  ];
-  type Key = 'name' | 'status';
-  let key = $state<Key>('name');
-  let direction = $state<'ascending' | 'descending'>('ascending');
-  let selected = $state('');
-  const sorted = $derived(
-    [...rows].sort((a, b) => a[key].localeCompare(b[key]) * (direction === 'ascending' ? 1 : -1)),
-  );
-  function sort(next: Key) {
-    direction = next === key && direction === 'ascending' ? 'descending' : 'ascending';
-    key = next;
+  let {
+    label = 'Sortable data table',
+    className = '',
+    rows = defaultRows,
+    sort,
+    defaultSort = defaultTableSort,
+    selectedId,
+    onSortChange,
+    onSelect,
+    cell,
+  }: TableOptions & { cell?: Snippet<[TableRow, SortKey]> } = $props();
+  let localSort = $state(untrack(() => defaultSort));
+  let localSelected = $state('');
+  const currentSort = $derived(sort ?? localSort);
+  const sorted = $derived(sortRows(rows, currentSort));
+  const selected = $derived(rows.find((row) => row.id === (selectedId ?? localSelected)));
+  function updateSort(key: SortKey) {
+    const next = nextSort(currentSort, key);
+    if (sort === undefined) localSort = next;
+    onSortChange?.(next);
+  }
+  function choose(row: TableRow) {
+    if (selectedId === undefined) localSelected = row.id;
+    onSelect?.(row);
   }
 </script>
 
-<div
-  bind:this={root}
-  class={`bw-demo ${className}`}
-  data-active={active}
-  data-component="sortable-data-table"
->
+<section class={`bw-demo bwm-sortable-data-table ${className}`}>
   <div class="bwm-table-shell">
     <div class="bwm-table-meta" aria-hidden="true">
-      <span>System index</span><span>03 records</span>
+      <span>System index</span><span>{rows.length.toString().padStart(2, '0')} records</span>
     </div>
     <div class="bwm-table-scroll">
       <table class="bwm-table">
-        <caption class="bw-sr-only">{label}</caption><thead
-          ><tr
-            ><th scope="col" aria-sort={key === 'name' ? direction : undefined}
-              ><button type="button" onclick={() => sort('name')}
-                >Name {key === 'name' ? (direction === 'ascending' ? '↑' : '↓') : '↕'}</button
-              ></th
-            ><th scope="col" aria-sort={key === 'status' ? direction : undefined}
-              ><button type="button" onclick={() => sort('status')}
-                >Status {key === 'status' ? (direction === 'ascending' ? '↑' : '↓') : '↕'}</button
-              ></th
-            ><th scope="col">Action</th></tr
-          ></thead
-        ><tbody
-          >{#each sorted as row (row.id)}<tr
-              ><td>{row.name}</td><td
+        <caption class="bw-sr-only">{label}</caption>
+        <thead
+          ><tr>
+            {#each ['name', 'status'] as key (key)}
+              <th
+                scope="col"
+                aria-sort={currentSort.key === key ? currentSort.direction : undefined}
+              >
+                <button type="button" onclick={() => updateSort(key as SortKey)}
+                  >{key === 'name' ? 'Name' : 'Status'}<span aria-hidden="true"
+                    >{currentSort.key === key
+                      ? currentSort.direction === 'ascending'
+                        ? '↑'
+                        : '↓'
+                      : '↕'}</span
+                  ></button
+                >
+              </th>
+            {/each}
+            <th scope="col" class="bwm-action-heading">Action</th>
+          </tr></thead
+        >
+        <tbody
+          >{#each sorted as row (row.id)}<tr>
+              <td
+                ><span class="bwm-row-marker" aria-hidden="true"></span>{#if cell}{@render cell(
+                    row,
+                    'name',
+                  )}{:else}{row.name}{/if}</td
+              >
+              <td
                 ><span class={`bwm-status bwm-status-${row.status.toLowerCase()}`}
-                  >{row.status}</span
+                  >{#if cell}{@render cell(row, 'status')}{:else}{row.status}{/if}</span
                 ></td
-              ><td
+              >
+              <td
                 ><button
                   type="button"
                   class="bwm-row-action"
                   aria-label={`Inspect ${row.name}`}
-                  onclick={() => (selected = row.name)}>Inspect</button
+                  onclick={() => choose(row)}>Inspect</button
                 ></td
-              ></tr
-            >{/each}</tbody
+              >
+            </tr>{/each}</tbody
         >
       </table>
     </div>
-    <p class="bwm-table-status" role="status">
-      {selected ? `Selected ${selected}.` : 'Select a record to inspect.'}
+    <p class="bwm-table-status" role="status" aria-live="polite">
+      {!rows.length
+        ? 'No records available.'
+        : selected
+          ? `Selected ${selected.name}.`
+          : 'Select a record to inspect.'}
     </p>
   </div>
-</div>
+</section>

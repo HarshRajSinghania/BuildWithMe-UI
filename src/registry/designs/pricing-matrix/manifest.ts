@@ -54,6 +54,42 @@ export default defineManifest({
       default: '',
       description: 'Additional root CSS class.',
     },
+    {
+      name: 'plans',
+      type: 'readonly PricingPlan[]',
+      default: 'built-in plans',
+      description: 'Unique IDs, names, monthly prices, optional yearly prices, and feature lists.',
+    },
+    {
+      name: 'billing',
+      type: 'monthly | yearly',
+      default: 'uncontrolled',
+      description: 'Controlled billing; Vue supports v-model:billing.',
+    },
+    {
+      name: 'defaultBilling',
+      type: 'monthly | yearly',
+      default: 'monthly',
+      description: 'Initial uncontrolled billing.',
+    },
+    {
+      name: 'selectedPlan',
+      type: 'string',
+      default: 'uncontrolled',
+      description: 'Controlled plan ID; Vue supports v-model:selected-plan.',
+    },
+    {
+      name: 'onBillingChange',
+      type: '(billing: Billing) => void',
+      default: 'undefined',
+      description: 'React/Svelte callback; Vue emits billing-change and update:billing.',
+    },
+    {
+      name: 'onPlanSelect',
+      type: '(id: string) => void',
+      default: 'undefined',
+      description: 'React/Svelte callback; Vue emits plan-select and update:selectedPlan.',
+    },
   ],
   provenance: {
     type: 'original',

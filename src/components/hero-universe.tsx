@@ -38,8 +38,16 @@ function Network() {
   useFrame((state, delta) => {
     if (!group.current) return;
     group.current.rotation.y += delta * 0.055;
-    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, pointer.y * 0.12, 0.025);
-    group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, -pointer.x * 0.08, 0.025);
+    group.current.rotation.x = THREE.MathUtils.lerp(
+      group.current.rotation.x,
+      pointer.y * 0.12,
+      0.025,
+    );
+    group.current.rotation.z = THREE.MathUtils.lerp(
+      group.current.rotation.z,
+      -pointer.x * 0.08,
+      0.025,
+    );
     group.current.position.y = Math.sin(state.clock.elapsedTime * 0.34) * 0.08;
   });
   return (

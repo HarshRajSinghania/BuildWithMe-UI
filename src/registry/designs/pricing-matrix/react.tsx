@@ -1,21 +1,38 @@
 // MIT · BuildWithMe-UI contributors. Original implementation.
 'use client';
 import { useState } from 'react';
+import {
+  defaultPlans,
+  planPrice,
+  type Billing,
+  type PricingOptions,
+} from '../../shared/component-data';
 import '../../shared/base.css';
 import './pricing-matrix.css';
-
-export interface PricingMatrixProps {
-  label?: string;
-  className?: string;
-}
+export type PricingMatrixProps = PricingOptions;
 export default function PricingMatrix({
   label = 'Pricing matrix',
   className = '',
+  plans = defaultPlans,
+  billing,
+  defaultBilling = 'monthly',
+  selectedPlan,
+  onBillingChange,
+  onPlanSelect,
 }: PricingMatrixProps) {
-  const [yearly, setYearly] = useState(false);
-  const [selected, setSelected] = useState('');
-  const plans = ['Starter', 'Studio', 'Team'];
-  const prices = [0, 18, 42];
+  const [localBilling, setLocalBilling] = useState<Billing>(defaultBilling);
+  const [localSelected, setLocalSelected] = useState('');
+  const currentBilling = billing ?? localBilling;
+  const selected = plans.find((plan) => plan.id === (selectedPlan ?? localSelected));
+  function toggle() {
+    const next = currentBilling === 'monthly' ? 'yearly' : 'monthly';
+    if (billing === undefined) setLocalBilling(next);
+    onBillingChange?.(next);
+  }
+  function choose(id: string) {
+    if (selectedPlan === undefined) setLocalSelected(id);
+    onPlanSelect?.(id);
+  }
   return (
     <section className={`bw-demo bwm-pricing-matrix ${className}`}>
       <div className="bwm-pricing">
@@ -25,37 +42,41 @@ export default function PricingMatrix({
           <button
             type="button"
             className="bwm-control"
-            aria-pressed={yearly}
-            onClick={() => setYearly(!yearly)}
+            aria-pressed={currentBilling === 'yearly'}
+            onClick={toggle}
           >
-            Yearly billing {yearly ? '✓' : '○'}
+            Yearly billing {currentBilling === 'yearly' ? '✓' : '○'}
           </button>
         </div>
         <div className="bwm-plans">
-          {plans.map((plan, i) => (
-            <article className="bwm-panel" key={plan}>
-              <h4>{plan}</h4>
+          {plans.map((plan) => (
+            <article className="bwm-panel" key={plan.id}>
+              <h4>{plan.name}</h4>
               <strong>
-                ${yearly ? Math.round(prices[i] * 0.8) : prices[i]}
+                ${planPrice(plan, currentBilling)}
                 <small> / month</small>
               </strong>
               <ul>
-                <li>{i === 0 ? 'Personal projects' : 'Unlimited projects'}</li>
-                <li>{i === 2 ? 'Team workspace' : 'One workspace'}</li>
-                <li>Keep your source</li>
+                {plan.features.map((feature, i) => (
+                  <li key={i}>{feature}</li>
+                ))}
               </ul>
               <button
                 type="button"
-                aria-pressed={selected === plan}
-                onClick={() => setSelected(plan)}
+                aria-pressed={selected?.id === plan.id}
+                onClick={() => choose(plan.id)}
               >
-                Choose {plan}
+                Choose {plan.name}
               </button>
             </article>
           ))}
         </div>
         <p role="status">
-          {selected ? `${selected} selected locally.` : 'Find room for your next idea.'}
+          {!plans.length
+            ? 'No plans available.'
+            : selected
+              ? `${selected.name} selected locally.`
+              : 'Find room for your next idea.'}
         </p>
       </div>
     </section>
