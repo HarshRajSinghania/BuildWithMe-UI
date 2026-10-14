@@ -58,7 +58,7 @@ watch(
         :key="index"
         class="bw-word"
         aria-hidden="true"
-        >{{ word }}
+        >{{ word + ' ' }}
       </span>
     </p>
   </div>

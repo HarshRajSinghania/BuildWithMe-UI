@@ -1,67 +1,64 @@
 <!-- MIT · BuildWithMe-UI contributors. Original implementation. -->
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
-import { observeMotion } from '../../shared/motion-lifecycle';
-
+import { computed, ref } from 'vue';
+import {
+  defaultRows,
+  defaultTableSort,
+  sortRows,
+  nextSort,
+  type TableRow,
+  type TableSort,
+  type SortKey,
+} from '../../shared/component-data';
 import '../../shared/base.css';
 import './sortable-data-table.css';
-const props = withDefaults(defineProps<{ label?: string; className?: string }>(), {
-  label: 'Sortable data table',
-  className: '',
-});
-const root = ref<HTMLElement | null>(null);
-const active = ref(false);
-const reduced = ref(true);
-const uid = useId();
-let lifecycle: ReturnType<typeof observeMotion> | undefined;
-onMounted(() => {
-  if (root.value)
-    lifecycle = observeMotion(
-      root.value,
-      (state) => {
-        active.value = state.active;
-        reduced.value = state.reduced;
-      },
-      false,
-    );
-});
-watch(
-  () => false,
-  (value) => lifecycle?.setPaused(Boolean(value)),
+const props = withDefaults(
+  defineProps<{
+    label?: string;
+    className?: string;
+    rows?: readonly TableRow[];
+    sort?: TableSort;
+    defaultSort?: TableSort;
+    selectedId?: string;
+  }>(),
+  {
+    label: 'Sortable data table',
+    className: '',
+    rows: () => defaultRows,
+    defaultSort: () => defaultTableSort,
+  },
 );
-onBeforeUnmount(() => lifecycle?.destroy());
-const rows = [
-  { id: 'aurora', name: 'Aurora', status: 'Ready' },
-  { id: 'orbit', name: 'Orbit', status: 'Review' },
-  { id: 'signal', name: 'Signal', status: 'Ready' },
-];
-type Key = 'name' | 'status';
-const key = ref<Key>('name');
-const direction = ref<'ascending' | 'descending'>('ascending');
-const selected = ref('');
-const sorted = computed(() =>
-  [...rows].sort(
-    (a, b) => a[key.value].localeCompare(b[key.value]) * (direction.value === 'ascending' ? 1 : -1),
-  ),
+const emit = defineEmits<{
+  'update:sort': [sort: TableSort];
+  sortChange: [sort: TableSort];
+  'update:selectedId': [id: string];
+  select: [row: TableRow];
+}>();
+const localSort = ref(props.defaultSort);
+const localSelected = ref('');
+const currentSort = computed(() => props.sort ?? localSort.value);
+const sorted = computed(() => sortRows(props.rows, currentSort.value));
+const selected = computed(() =>
+  props.rows.find((row) => row.id === (props.selectedId ?? localSelected.value)),
 );
-function sort(next: Key) {
-  direction.value =
-    next === key.value && direction.value === 'ascending' ? 'descending' : 'ascending';
-  key.value = next;
+function updateSort(key: SortKey) {
+  const next = nextSort(currentSort.value, key);
+  if (props.sort === undefined) localSort.value = next;
+  emit('update:sort', next);
+  emit('sortChange', next);
+}
+function choose(row: TableRow) {
+  if (props.selectedId === undefined) localSelected.value = row.id;
+  emit('update:selectedId', row.id);
+  emit('select', row);
 }
 </script>
-
 <template>
-  <div
-    ref="root"
-    class="bw-demo"
-    :class="props.className"
-    :data-active="active"
-    data-component="sortable-data-table"
-  >
+  <section :class="`bw-demo bwm-sortable-data-table ${props.className}`">
     <div class="bwm-table-shell">
       <div class="bwm-table-meta" aria-hidden="true">
-        <span>System index</span><span>03 records</span>
+        <span>System index</span
+        ><span>{{ props.rows.length.toString().padStart(2, '0') }} records</span>
       </div>
       <div class="bwm-table-scroll">
         <table class="bwm-table">
@@ -72,33 +69,47 @@ function sort(next: Key) {
           </caption>
           <thead>
             <tr>
-              <th scope="col" :aria-sort="key === 'name' ? direction : undefined">
-                <button type="button" @click="sort('name')">
-                  Name {{ key === 'name' ? (direction === 'ascending' ? '↑' : '↓') : '↕' }}
+              <th
+                v-for="key in ['name', 'status'] as const"
+                :key="key"
+                scope="col"
+                :aria-sort="currentSort.key === key ? currentSort.direction : undefined"
+              >
+                <button type="button" @click="updateSort(key)">
+                  {{ key === 'name' ? 'Name' : 'Status'
+                  }}<span aria-hidden="true">{{
+                    currentSort.key === key
+                      ? currentSort.direction === 'ascending'
+                        ? '↑'
+                        : '↓'
+                      : '↕'
+                  }}</span>
                 </button>
               </th>
-              <th scope="col" :aria-sort="key === 'status' ? direction : undefined">
-                <button type="button" @click="sort('status')">
-                  Status {{ key === 'status' ? (direction === 'ascending' ? '↑' : '↓') : '↕' }}
-                </button>
-              </th>
-              <th scope="col">Action</th>
+              <th scope="col" class="bwm-action-heading">Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="row in sorted" :key="row.id">
-              <td>{{ row.name }}</td>
               <td>
-                <span class="bwm-status" :class="`bwm-status-${row.status.toLowerCase()}`">{{
-                  row.status
-                }}</span>
+                <span class="bwm-row-marker" aria-hidden="true" /><slot
+                  name="cell"
+                  :row="row"
+                  column="name"
+                  >{{ row.name }}</slot
+                >
+              </td>
+              <td>
+                <span :class="`bwm-status bwm-status-${row.status.toLowerCase()}`"
+                  ><slot name="cell" :row="row" column="status">{{ row.status }}</slot></span
+                >
               </td>
               <td>
                 <button
                   type="button"
                   class="bwm-row-action"
                   :aria-label="`Inspect ${row.name}`"
-                  @click="selected = row.name"
+                  @click="choose(row)"
                 >
                   Inspect
                 </button>
@@ -107,9 +118,15 @@ function sort(next: Key) {
           </tbody>
         </table>
       </div>
-      <p class="bwm-table-status" role="status">
-        {{ selected ? `Selected ${selected}.` : 'Select a record to inspect.' }}
+      <p class="bwm-table-status" role="status" aria-live="polite">
+        {{
+          !props.rows.length
+            ? 'No records available.'
+            : selected
+              ? `Selected ${selected.name}.`
+              : 'Select a record to inspect.'
+        }}
       </p>
     </div>
-  </div>
+  </section>
 </template>

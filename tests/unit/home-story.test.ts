@@ -19,12 +19,16 @@ describe('Interface Cosmos story configuration', () => {
     expect(story.featured.map((component) => component.id)).toEqual(featuredComponentIds);
     expect(story.stats.designs).toBe(components.length);
     expect(story.stats.implementations).toBe(components.length * 3);
-    expect(story.domains.reduce((sum, domain) => sum + domain.count, 0)).toBeGreaterThanOrEqual(components.length);
+    expect(story.domains.reduce((sum, domain) => sum + domain.count, 0)).toBeGreaterThanOrEqual(
+      components.length,
+    );
   });
 
   it('accounts for every provenance variant without inventing social metrics', () => {
     const story = getHomeStory();
-    expect(story.provenance.original + story.provenance.adapted + story.provenance.remix).toBe(components.length);
+    expect(story.provenance.original + story.provenance.adapted + story.provenance.remix).toBe(
+      components.length,
+    );
   });
 
   it('keeps exact provenance for every imported design', () => {
@@ -32,7 +36,9 @@ describe('Interface Cosmos story configuration', () => {
     expect(adapted).toHaveLength(15);
     for (const component of adapted) {
       if (component.provenance.type !== 'adapted') continue;
-      expect(component.provenance.upstreamUrl).toMatch(/^https:\/\/github\.com\/(Ashutoshx7\/VengeanceUI|vercel\/(examples|registry-starter))\/blob\//);
+      expect(component.provenance.upstreamUrl).toMatch(
+        /^https:\/\/github\.com\/(Ashutoshx7\/VengeanceUI|vercel\/(examples|registry-starter))\/blob\//,
+      );
       expect(component.provenance.upstreamLicense).toBe('MIT');
       expect(component.provenance.modification.length).toBeGreaterThan(30);
     }

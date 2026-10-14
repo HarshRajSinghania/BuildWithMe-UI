@@ -15,6 +15,7 @@ export default function StackedCards({ paused = false }: AnimationProps) {
       <div className="bw-stack">
         <span className="bw-stack-back" aria-hidden="true" />
         <motion.button
+          type="button"
           key={index}
           initial={active ? { rotate: -6, x: -15 } : false}
           animate={{ rotate: 0, x: 0 }}

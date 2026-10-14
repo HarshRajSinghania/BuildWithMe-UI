@@ -70,7 +70,7 @@ export default defineManifest({
     upstreamAuthor: 'Ashutoshx7',
     upstreamLicense: 'MIT',
     modification:
-      'Reimplemented as a dependency-light, monochrome, theme-aware design with React, Vue, and Svelte source variants and reduced-motion behavior. Kinetic Playground repair (2026-10-05): framework-native behavior, scoped motion lifecycle, complete source closure, and corrected source usage; original upstream notices retained.',
+      'Reimplemented as a dependency-light, monochrome, theme-aware design with React, Vue, and Svelte source variants and reduced-motion behavior. Kinetic Playground repair (2026-10-05): framework-native behavior, scoped motion lifecycle, complete source closure, and corrected source usage; original upstream notices retained. Readiness repair (2026-10-07): semantic text is exposed once to assistive technology while animated letters remain decorative.',
   },
   related: [],
   style: 'designs/flip-text/flip-text.css',

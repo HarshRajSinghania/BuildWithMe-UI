@@ -1,3 +1,30 @@
 /* Adapted under MIT from https://github.com/Ashutoshx7/VengeanceUI/blob/main/src/components/ui/glass-dock.tsx. Copyright (c) Ashutoshx7. */
-.adapt-dock{display:flex;align-items:end;gap:8px;padding:9px;border:1px solid var(--bw-line);border-radius:18px;background:color-mix(in srgb,var(--bw-panel) 82%,transparent);box-shadow:0 20px 60px #0005}.adapt-dock button{width:48px;height:48px;border:1px solid var(--bw-line);border-radius:12px;background:var(--bw-panel);font-size:20px;transition:transform .2s}.adapt-dock button:hover,.adapt-dock button:focus-visible{transform:translateY(-9px) scale(1.12)}
-@media(prefers-reduced-motion:reduce){.bw-demo *{animation:none!important;transition:none!important}}
+.adapt-dock {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid var(--bw-line);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bw-panel) 82%, transparent);
+  box-shadow: 0 20px 60px #0005;
+}
+.adapt-dock button {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--bw-line);
+  border-radius: 12px;
+  background: var(--bw-panel);
+  font-size: 20px;
+  transition: transform 0.2s;
+}
+.adapt-dock button:hover,
+.adapt-dock button:focus-visible {
+  transform: translateY(-9px) scale(1.12);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bw-demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

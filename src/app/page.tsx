@@ -9,6 +9,8 @@ import { getHomeStory } from '@/lib/home-story';
 import { getComponent, siteUrl, sources } from '@/lib/registry';
 import type { Framework } from '@/registry/schema';
 
+export const metadata = { alternates: { canonical: '/' } };
+
 export default function Home() {
   const story = getHomeStory();
   const tabs = getComponent('animated-tabs')!;

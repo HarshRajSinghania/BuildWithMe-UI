@@ -25,7 +25,8 @@
 </script>
 
 <div bind:this={root} class="bw-demo" data-active={active} data-component="flip-text">
-  <p class="adapt-flip" aria-label={label}>
+  <p class="adapt-flip">
+    <span class="bw-sr-only">{label}</span>
     {#each label.split('') as letter, index (index)}<span
         aria-hidden="true"
         style:animation-delay={`${index * 45}ms`}>{letter === ' ' ? ' ' : letter}</span

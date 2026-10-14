@@ -107,7 +107,15 @@ export function ComponentWorkbench({
             <p>
               Receive the complete component and its dependencies. npm packages are not published.
             </p>
-            <ComponentInstall id={id} site={site} framework={framework} />
+            <ComponentInstall
+              id={id}
+              site={site}
+              framework={framework}
+              usage={definitions[framework].usage}
+              files={sources[framework].map((file) =>
+                (file.target ?? file.path).split('/').at(-1)!,
+              )}
+            />
           </section>
           {inspector}
         </aside>

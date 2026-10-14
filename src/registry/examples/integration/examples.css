@@ -1,0 +1,50 @@
+.bwm-examples {
+  width: 100%;
+  min-width: 0;
+  color: inherit;
+}
+.example-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 16px 0;
+}
+.example-actions button {
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.example-actions label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.example-events {
+  display: block;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  font-family: monospace;
+}
+.example-grid {
+  display: grid;
+  gap: 24px;
+}
+.example-grid > section {
+  min-width: 0;
+  border: 1px solid var(--bwm-component-border);
+  padding: 12px;
+}
+.example-grid h2 {
+  margin: 8px 12px;
+  font-size: 20px;
+}
+.example-grid .bw-demo {
+  min-width: 0;
+}
+.example-form {
+  margin: 0;
+}

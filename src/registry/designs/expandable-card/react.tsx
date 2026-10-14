@@ -15,6 +15,7 @@ export default function ExpandableCard({ paused = false }: AnimationProps) {
         <p className="bw-caption">Field notes · 001</p>
         <h3 className="bw-title">Less, but better.</h3>
         <button
+          type="button"
           className="bw-expand-toggle"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}

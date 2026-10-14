@@ -45,7 +45,7 @@
     <span class="bw-sr-only">{text}</span>{#each text.split(' ') as word, index (index)}<span
         class="bw-word"
         aria-hidden="true"
-        >{word}
+        >{word + ' '}
       </span>{/each}
   </p>
 </div>

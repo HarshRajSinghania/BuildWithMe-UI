@@ -34,7 +34,8 @@ onBeforeUnmount(() => lifecycle?.destroy());
 
 <template>
   <div ref="root" class="bw-demo" :data-active="active" data-component="flip-text">
-    <p class="adapt-flip" :aria-label="props.label">
+    <p class="adapt-flip">
+      <span class="bw-sr-only">{{ props.label }}</span>
       <span
         v-for="(letter, index) in props.label"
         :key="index"

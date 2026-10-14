@@ -12,7 +12,7 @@ export default function BorderTraceButton({
   const { ref, active } = useAnimation(paused);
   return (
     <div ref={ref} className="bw-demo" data-active={active}>
-      <button className="bw-button bw-trace" onClick={onClick}>
+      <button type="button" className="bw-button bw-trace" onClick={onClick}>
         <span>{label}</span>
       </button>
     </div>

@@ -7,6 +7,7 @@ import type { Framework } from '@/registry/schema';
 type HostMessage =
   | { source: 'buildwithme-host'; type: 'theme'; value: 'dark' | 'light' }
   | { source: 'buildwithme-host'; type: 'pause'; value: boolean }
+  | { source: 'buildwithme-host'; type: 'ping' }
   | { source: 'buildwithme-host'; type: 'replay' };
 
 type PreviewMessage = {
@@ -28,19 +29,52 @@ export function FrameworkPreview({
   const [siteTheme, setSiteTheme] = useState<'dark' | 'light'>('dark');
   const [theme, setTheme] = useState<'site' | 'dark' | 'light'>('site');
   const [paused, setPaused] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [width, setWidth] = useState('100%');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
   const effectiveTheme = theme === 'site' ? siteTheme : theme;
-  const [frameSrc] = useState(
+  const [frameSrc, setFrameSrc] = useState(
     () =>
       `/preview-runtime/${framework}/index.html?id=${encodeURIComponent(id)}&theme=${effectiveTheme}`,
   );
-  const send = useCallback(
-    (message: HostMessage) =>
-      frame.current?.contentWindow?.postMessage(message, window.location.origin),
-    [],
-  );
+  const send = useCallback((message: HostMessage) => {
+    const target = frame.current?.contentWindow;
+    // Keep the sender's native method in the host realm. WebKit can otherwise
+    // attribute timer/load messages to the receiving iframe's Window.
+    if (target) window.postMessage.call(target, message, { targetOrigin: window.location.origin });
+  }, []);
+  const effectivePaused = paused || !visible;
+  const settings = useRef({ theme: effectiveTheme, paused: effectivePaused });
+  useEffect(() => {
+    settings.current = { theme: effectiveTheme, paused: effectivePaused };
+  }, [effectiveTheme, effectivePaused]);
+  useEffect(() => {
+    setFrameSrc(
+      `/preview-runtime/${framework}/index.html?id=${encodeURIComponent(id)}&theme=${settings.current.theme}`,
+    );
+    setStatus('loading');
+    setError('');
+  }, [id, framework]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting));
+    if (frame.current) observer.observe(frame.current);
+    return () => observer.disconnect();
+  }, [frameSrc]);
+  useEffect(() => {
+    if (status !== 'loading') return;
+    // The iframe can finish before host hydration, or while an effect changes.
+    // Ask for its current state until the host has acknowledged readiness.
+    const handshake = setInterval(() => send({ source: 'buildwithme-host', type: 'ping' }), 500);
+    const timeout = setTimeout(() => {
+      setStatus('error');
+      setError('The preview did not become ready. Retry to reload its runtime.');
+    }, 15000);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(handshake);
+    };
+  }, [status, frameSrc, send]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -55,8 +89,8 @@ export function FrameworkPreview({
     [effectiveTheme, send],
   );
   useEffect(
-    () => send({ source: 'buildwithme-host', type: 'pause', value: paused }),
-    [paused, send],
+    () => send({ source: 'buildwithme-host', type: 'pause', value: effectivePaused }),
+    [effectivePaused, send],
   );
   useEffect(() => {
     const receive = (event: MessageEvent<PreviewMessage>) => {
@@ -70,8 +104,8 @@ export function FrameworkPreview({
         return;
       if (event.data.type === 'ready') {
         setStatus('ready');
-        send({ source: 'buildwithme-host', type: 'theme', value: effectiveTheme });
-        send({ source: 'buildwithme-host', type: 'pause', value: paused });
+        send({ source: 'buildwithme-host', type: 'theme', value: settings.current.theme });
+        send({ source: 'buildwithme-host', type: 'pause', value: settings.current.paused });
       }
       if (event.data.type === 'error') {
         setStatus('error');
@@ -80,12 +114,18 @@ export function FrameworkPreview({
     };
     window.addEventListener('message', receive);
     return () => window.removeEventListener('message', receive);
-  }, [framework, id, effectiveTheme, paused, send]);
+  }, [framework, id, send]);
 
   function replay() {
+    if (status === 'error') {
+      setFrameSrc((current) => {
+        const url = new URL(current, window.location.origin);
+        url.searchParams.set('retry', String(Number(url.searchParams.get('retry') ?? 0) + 1));
+        return `${url.pathname}${url.search}`;
+      });
+    } else send({ source: 'buildwithme-host', type: 'replay' });
     setStatus('loading');
     setError('');
-    send({ source: 'buildwithme-host', type: 'replay' });
   }
 
   return (
@@ -151,11 +191,16 @@ export function FrameworkPreview({
           </div>
         ) : null}
         <iframe
+          key={frameSrc}
           ref={frame}
           className="framework-preview-frame"
           title={`${framework} preview for ${id}`}
           src={frameSrc}
-          onLoad={() => send({ source: 'buildwithme-host', type: 'theme', value: effectiveTheme })}
+          onLoad={() => {
+            send({ source: 'buildwithme-host', type: 'theme', value: effectiveTheme });
+            send({ source: 'buildwithme-host', type: 'pause', value: effectivePaused });
+            send({ source: 'buildwithme-host', type: 'ping' });
+          }}
         />
       </div>
     </div>

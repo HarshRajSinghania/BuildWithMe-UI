@@ -2,7 +2,13 @@
 
 Audit date: 2026-09-26. Baseline: commit `3995ed1`.
 
-## Current implementation — 2026-10-05
+## Current remediation — 2026-10-08
+
+The approved readiness remediation is implemented on `codex/readiness-remediation`. [The current remediation report](readiness-remediation-2026-10-08.md) records fixes, actual verification, visual review, and remaining acceptance boundaries. It supersedes the browser-blocked and pending-baseline statements in the historical sections below. Local browser testing is authorized and has been executed. Capability verification remains provisional where deeper contracts have not been accepted; packages remain unpublished.
+
+The single lightweight Linux CI policy is preserved. Comprehensive browser/distribution checks remain explicit release checks.
+
+## Historical implementation — 2026-10-05
 
 CI policy update — 2026-10-06: at the user's request, automation is reduced to one Linux `verify` job running `pnpm check:quick` (lint, types, unit tests, and registry validation). The Windows browser matrix, automatic consumer installation/package checks, diagnostic artifact uploads, and npm publication workflow are removed. The existing full build, browser, and installation commands remain available locally by scope. Screenshot baseline approval is no longer an automatic PR gate. This changes automation policy, not the evidence for browser quality: outstanding visual and full behavioral review remains recorded below. Previous workflow descriptions are historical.
 

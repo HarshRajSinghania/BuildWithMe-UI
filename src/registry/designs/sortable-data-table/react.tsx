@@ -5,42 +5,43 @@ import { useMemo, useState } from 'react';
 import '../../shared/base.css';
 import './sortable-data-table.css';
 
-const rows = [
-  { id: 'aurora', name: 'Aurora', status: 'Ready' },
-  { id: 'orbit', name: 'Orbit', status: 'Review' },
-  { id: 'signal', name: 'Signal', status: 'Ready' },
-] as const;
-
-type SortKey = 'name' | 'status';
-type SortDirection = 'ascending' | 'descending';
-
-export interface SortableDataTableProps {
-  label?: string;
-  className?: string;
+import {
+  defaultRows,
+  defaultTableSort,
+  sortRows,
+  nextSort,
+  type TableOptions,
+  type TableRow,
+  type SortKey,
+} from '../../shared/component-data';
+import type { ReactNode } from 'react';
+export interface SortableDataTableProps extends TableOptions {
+  renderCell?: (row: TableRow, key: SortKey) => ReactNode;
 }
-
 export default function SortableDataTable({
   label = 'Sortable data table',
   className = '',
+  rows = defaultRows,
+  sort: controlledSort,
+  defaultSort = defaultTableSort,
+  selectedId,
+  onSortChange,
+  onSelect,
+  renderCell,
 }: SortableDataTableProps) {
-  const [sort, setSort] = useState<{ key: SortKey; direction: SortDirection }>({
-    key: 'name',
-    direction: 'ascending',
-  });
-  const [selected, setSelected] = useState('');
-  const sortedRows = useMemo(() => {
-    const direction = sort.direction === 'ascending' ? 1 : -1;
-    return [...rows].sort(
-      (left, right) => left[sort.key].localeCompare(right[sort.key]) * direction,
-    );
-  }, [sort]);
-
+  const [localSort, setLocalSort] = useState(defaultSort);
+  const [localSelected, setLocalSelected] = useState('');
+  const sort = controlledSort ?? localSort;
+  const selected = rows.find((row) => row.id === (selectedId ?? localSelected));
+  const sortedRows = useMemo(() => sortRows(rows, sort), [rows, sort]);
   function updateSort(key: SortKey) {
-    setSort((current) => ({
-      key,
-      direction:
-        current.key === key && current.direction === 'ascending' ? 'descending' : 'ascending',
-    }));
+    const next = nextSort(sort, key);
+    if (controlledSort === undefined) setLocalSort(next);
+    onSortChange?.(next);
+  }
+  function choose(row: TableRow) {
+    if (selectedId === undefined) setLocalSelected(row.id);
+    onSelect?.(row);
   }
 
   return (
@@ -81,11 +82,11 @@ export default function SortableDataTable({
                 <tr key={row.id}>
                   <td>
                     <span className="bwm-row-marker" aria-hidden="true" />
-                    {row.name}
+                    {renderCell ? renderCell(row, 'name') : row.name}
                   </td>
                   <td>
                     <span className={`bwm-status bwm-status-${row.status.toLowerCase()}`}>
-                      {row.status}
+                      {renderCell ? renderCell(row, 'status') : row.status}
                     </span>
                   </td>
                   <td>
@@ -93,7 +94,7 @@ export default function SortableDataTable({
                       type="button"
                       className="bwm-row-action"
                       aria-label={`Inspect ${row.name}`}
-                      onClick={() => setSelected(row.name)}
+                      onClick={() => choose(row)}
                     >
                       Inspect
                     </button>
@@ -104,7 +105,11 @@ export default function SortableDataTable({
           </table>
         </div>
         <p className="bwm-table-status" role="status" aria-live="polite">
-          {selected ? `Selected ${selected}.` : 'Select a record to inspect.'}
+          {!rows.length
+            ? 'No records available.'
+            : selected
+              ? `Selected ${selected.name}.`
+              : 'Select a record to inspect.'}
         </p>
       </div>
     </section>

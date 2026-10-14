@@ -36,7 +36,9 @@ export default function GenerationProgress({ paused = false }: AnimationProps) {
         </div>
         <div className="bw-progress-footer">
           <span>{value}%</span>
-          <button onClick={() => setProgress(0)}>Restart ↗</button>
+          <button type="button" onClick={() => setProgress(0)}>
+            Restart ↗
+          </button>
         </div>
       </div>
     </div>

@@ -54,6 +54,49 @@ export default defineManifest({
       default: '',
       description: 'Additional root CSS class.',
     },
+    {
+      name: 'rows',
+      type: 'readonly TableRow[]',
+      default: 'built-in rows',
+      description: 'Records with unique IDs, names, and statuses.',
+    },
+    {
+      name: 'sort',
+      type: 'TableSort',
+      default: 'uncontrolled',
+      description: 'Controlled key/direction; Vue supports v-model:sort.',
+    },
+    {
+      name: 'defaultSort',
+      type: 'TableSort',
+      default: 'name ascending',
+      description: 'Initial uncontrolled sort.',
+    },
+    {
+      name: 'selectedId',
+      type: 'string',
+      default: 'uncontrolled',
+      description: 'Controlled selected record ID; Vue supports v-model:selected-id.',
+    },
+    {
+      name: 'onSortChange',
+      type: '(sort: TableSort) => void',
+      default: 'undefined',
+      description: 'React/Svelte callback; Vue emits sort-change and update:sort.',
+    },
+    {
+      name: 'onSelect',
+      type: '(row: TableRow) => void',
+      default: 'undefined',
+      description: 'Full selected record; Vue emits select and update:selectedId.',
+    },
+    {
+      name: 'renderCell / cell',
+      type: 'render function / slot / snippet',
+      default: 'row[column]',
+      description:
+        'React renderCell(row, column), Vue #cell={row,column}, Svelte cell(row,column).',
+    },
   ],
   provenance: {
     type: 'original',

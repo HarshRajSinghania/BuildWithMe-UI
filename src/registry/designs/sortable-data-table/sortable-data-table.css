@@ -17,7 +17,9 @@
   padding: 11px 14px;
   border-bottom: 1px solid var(--bw-border);
   color: var(--bw-muted);
-  font: 9px/1.2 ui-monospace, monospace;
+  font:
+    9px/1.2 ui-monospace,
+    monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -43,7 +45,9 @@
 .bwm-table th {
   height: 42px;
   color: var(--bw-muted);
-  font: 9px/1 ui-monospace, monospace;
+  font:
+    9px/1 ui-monospace,
+    monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -104,7 +108,9 @@
   align-items: center;
   gap: 7px;
   color: var(--bw-muted);
-  font: 10px/1 ui-monospace, monospace;
+  font:
+    10px/1 ui-monospace,
+    monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -136,7 +142,9 @@
   border: 1px solid var(--bw-border);
   background: transparent;
   color: var(--bw-fg);
-  font: 9px/1 ui-monospace, monospace;
+  font:
+    9px/1 ui-monospace,
+    monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -153,7 +161,9 @@
   padding: 10px 14px;
   border-top: 1px solid var(--bw-border);
   color: var(--bw-muted);
-  font: 9px/1.2 ui-monospace, monospace;
+  font:
+    9px/1.2 ui-monospace,
+    monospace;
   letter-spacing: 0.05em;
 }
 

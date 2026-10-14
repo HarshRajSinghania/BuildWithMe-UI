@@ -12,7 +12,7 @@ export default function ShimmerButton({
   const { ref, active } = useAnimation(paused);
   return (
     <div ref={ref} className="bw-demo" data-active={active}>
-      <button className="bw-button bw-shimmer" onClick={onClick}>
+      <button type="button" className="bw-button bw-shimmer" onClick={onClick}>
         {label}
       </button>
     </div>

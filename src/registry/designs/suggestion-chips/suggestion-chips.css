@@ -1,7 +1,7 @@
 .bw-chips {
-  width: 280px;
+  width: min(100%, 280px);
 }
-.bw-chips button {
+.bw-demo .bw-chips button {
   width: 100%;
   display: flex;
   justify-content: space-between;
